@@ -31,8 +31,8 @@ public class BillGenerator {
 
     public WaterBill generateBill() {
         double apartmentConsumption = (apartmentType == ApartmentType.TWO_BHK) ? (3 * 10 * 30) : (5 * 10 * 30);
-        double borewellWater = apartmentConsumption * ratio.borewellWater;
-        double corporationWater = apartmentConsumption * ratio.corporationWater;
+        double borewellWater = Math.round(apartmentConsumption * ratio.borewellWater);
+        double corporationWater = Math.round(apartmentConsumption * ratio.corporationWater);
         double apartmentBill = borewellWater * Prices.BOREWELL_WATER + corporationWater * Prices.CORPORATION_WATER;
 
         double guestsConsumption = guests * 10 * 30;
@@ -40,11 +40,12 @@ public class BillGenerator {
         double totalConsumption = apartmentConsumption + guestsConsumption;
         for (int i = 0; i < Prices.tankWaterSlabs.size(); i++) {
             TankWaterSlab tankWaterSlab = Prices.tankWaterSlabs.get(i);
-            totalBill += Math.min(tankWaterSlab.max, guestsConsumption) * tankWaterSlab.price;
-            if (guestsConsumption <= tankWaterSlab.max) {
+            if(tankWaterSlab.max < guestsConsumption){
+                totalBill += (tankWaterSlab.max - tankWaterSlab.min + 1) * tankWaterSlab.price;
+            } else {
+                totalBill += (guestsConsumption - tankWaterSlab.min + 1) * tankWaterSlab.price;
                 break;
             }
-            guestsConsumption -= tankWaterSlab.max;
         }
         return new WaterBill(Math.round(totalConsumption), Math.round(totalBill));
     }
